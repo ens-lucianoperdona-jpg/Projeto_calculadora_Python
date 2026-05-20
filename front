@@ -1,0 +1,115 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# --- VARIÁVEIS GLOBAIS (O "cérebro" do programa) ---
+historico = []  # Substitui as 5 variáveis soltas por uma lista dinâmica
+
+# --- FUNÇÃO ATUALIZAR HISTÓRICO NA TELA ---
+def atualizar_tela_historico():
+    # Limpa a caixinha visual do histórico
+    lista_historico.delete(0, tk.END)
+    
+    # Preenche a caixinha com o que estiver na nossa lista de memória
+    for i, conta in enumerate(historico):
+        lista_historico.insert(tk.END, f"Espaço {i+1}: {conta}")
+
+# --- FUNÇÃO PRINCIPAL DE CÁLCULO ---
+def calcular(operacao):
+    try:
+        # Pega os números digitados e converte para float
+        n1 = float(campo_n1.get())
+        n2 = float(campo_n2.get())
+        n3 = float(campo_n3.get())
+        resultado = 0
+
+        # Aplica a matemática baseada no botão clicado
+        if operacao == "somar":
+            resultado = n1 + n2 + n3
+        elif operacao == "subtrair":
+            resultado = n1 - n2 - n3
+        elif operacao == "multiplicar":
+            resultado = n1 * n2 * n3
+        elif operacao == "dividir":
+            if n2 == 0:
+                messagebox.showerror("Erro", "Não é possível dividir por zero!")
+                return
+            resultado = n1 / n2 / n3
+        elif operacao == "porcentagem":
+            resultado = (n1 * n2 * n3) / 100
+
+        # Mostra o resultado na tela
+        lbl_resultado.config(text=f"Resultado: {resultado}")
+
+        # --- SUA LÓGICA DE HISTÓRICO (Máximo 5 itens) ---
+        if len(historico) >= 5:
+            historico.pop(0)  # Se já tem 5, apaga o mais antigo (o primeiro da fila)
+        
+        historico.append(resultado)  # Adiciona o resultado novo no fim da fila
+        
+        # Atualiza a caixinha visual do histórico
+        atualizar_tela_historico()
+
+    except ValueError:
+        # Se o usuário esquecer de digitar um número ou digitar letras
+        messagebox.showerror("Erro de Entrada", "Por favor, digite números válidos!")
+
+# --- CONFIGURAÇÃO DA JANELA PRINCIPAL ---
+janela = tk.Tk()
+janela.title("Calculadora Inteligente")
+janela.geometry("350x500")
+
+# --- INTERFACE VISUAL ---
+
+# Entradas de números
+lbl_n1 = tk.Label(janela, text="Primeiro Número:", font=("Arial", 10))
+lbl_n1.pack(pady=5)
+campo_n1 = tk.Entry(janela, font=("Arial", 12), justify="center")
+campo_n1.pack()
+
+lbl_n2 = tk.Label(janela, text="Segundo Número:", font=("Arial", 10))
+lbl_n2.pack(pady=5)
+campo_n2 = tk.Entry(janela, font=("Arial", 12), justify="center")
+campo_n2.pack()
+
+lbl_n3 = tk.Label(janela, text="Terceiro Número:", font=("Arial", 10))
+lbl_n3.pack(pady=5)
+campo_n3 = tk.Entry(janela, font=("Arial", 12), justify="center")
+campo_n3.pack()
+
+# Painel de Botões Matemáticos
+frame_botoes = tk.Frame(janela)
+frame_botoes.pack(pady=15)
+
+# Note o uso do 'lambda'. Ele serve para passarmos um texto ("somar", "subtrair") para dentro da função calcular.
+btn_mais = tk.Button(frame_botoes, text="+", width=5, font=("Arial", 12, "bold"), command=lambda: calcular("somar"))
+btn_mais.grid(row=0, column=0, padx=5, pady=5)
+
+btn_menos = tk.Button(frame_botoes, text="-", width=5, font=("Arial", 12, "bold"), command=lambda: calcular("subtrair"))
+btn_menos.grid(row=0, column=1, padx=5, pady=5)
+
+btn_vezes = tk.Button(frame_botoes, text="*", width=5, font=("Arial", 12, "bold"), command=lambda: calcular("multiplicar"))
+btn_vezes.grid(row=0, column=2, padx=5, pady=5)
+
+btn_dividir = tk.Button(frame_botoes, text="/", width=5, font=("Arial", 12, "bold"), command=lambda: calcular("dividir"))
+btn_dividir.grid(row=1, column=0, padx=5, pady=5)
+
+btn_porcent = tk.Button(frame_botoes, text="%", width=5, font=("Arial", 12, "bold"), command=lambda: calcular("porcentagem"))
+btn_porcent.grid(row=1, column=1, padx=5, pady=5)
+
+# Label para mostrar o resultado da conta atual
+lbl_resultado = tk.Label(janela, text="Resultado: ", font=("Arial", 14, "bold"), fg="blue")
+lbl_resultado.pack(pady=10)
+
+# Separador visual para o Histórico
+lbl_titulo_hist = tk.Label(janela, text="--- HISTÓRICO AUTOMÁTICO (Máx 5) ---", font=("Arial", 10, "italic"))
+lbl_titulo_hist.pack(pady=5)
+
+# Listbox: A caixinha visual que vai listar o nosso histórico
+lista_historico = tk.Listbox(janela, width=30, height=6, font=("Arial", 10), justify="center")
+lista_historico.pack(pady=5)
+
+# Inicializa o histórico na tela (aparecerá tudo vazio no começo)
+atualizar_tela_historico()
+
+# Mantém a janela aberta e rodando (Substitui o seu while programa_rodando == "sim")
+janela.mainloop()
